@@ -1,4 +1,4 @@
-module github.com/yourusername/watchtower-cli
+module github.com/0x4d61686469/Watchtower-cli
 
 go 1.25.0
 
