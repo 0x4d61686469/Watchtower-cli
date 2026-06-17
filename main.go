@@ -12,12 +12,16 @@ import (
 // Base API URL - change this if your backend runs elsewhere
 const baseURL = "http://127.0.0.1:5000"
 
+var allFlag bool
+
 func main() {
 	// Root Command: watchtower
 	var rootCmd = &cobra.Command{
 		Use:   "watchtower",
 		Short: "Watchtower CLI client for rapid recon querying",
 	}
+
+	rootCmd.PersistentFlags().BoolVar(&allFlag, "all", false, "Append ?all query parameter to the request")
 
 	// Subcommands (Categories)
 	var dnsCmd = &cobra.Command{Use: "dns", Short: "Query DNS recon data"}
@@ -32,7 +36,7 @@ func main() {
 		Use:   "analysis", 
 		Short: "Query analysis results by fetching /analyze",
 		Run: func(cmd *cobra.Command, args []string) {
-			makeRequest(baseURL + "/analyze")
+			makeRequest(withAllQuery(baseURL + "/analyze"))
 		},
 	}
 
@@ -106,7 +110,7 @@ func newQueryCmd(use, path string) *cobra.Command {
 		Use:   use,
 		Short: fmt.Sprintf("Fetch %s", path),
 		Run: func(cmd *cobra.Command, args []string) {
-			makeRequest(baseURL + path)
+			makeRequest(withAllQuery(baseURL + path))
 		},
 	}
 }
@@ -119,9 +123,16 @@ func newParamQueryCmd(use, pathTemplate string) *cobra.Command {
 		Args:  cobra.ExactArgs(1), // This forces the terminal to require the 1 argument
 		Run: func(cmd *cobra.Command, args []string) {
 			url := fmt.Sprintf(baseURL+pathTemplate, args[0])
-			makeRequest(url)
+			makeRequest(withAllQuery(url))
 		},
 	}
+}
+
+func withAllQuery(url string) string {
+	if allFlag {
+		return url + "?all"
+	}
+	return url
 }
 
 // Reusable HTTP request logic
