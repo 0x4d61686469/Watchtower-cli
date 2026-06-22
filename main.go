@@ -10,7 +10,7 @@ import (
 )
 
 // Base API URL - change this if your backend runs elsewhere
-const baseURL = "http://127.0.0.1:5000"
+var baseURL = fmt.Sprintf("http://%s:5000", os.Getenv("VPS_IP"))
 
 var allFlag bool
 
