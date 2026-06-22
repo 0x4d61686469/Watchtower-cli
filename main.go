@@ -137,12 +137,28 @@ func withAllQuery(url string) string {
 
 // Reusable HTTP request logic
 func makeRequest(url string) {
-	resp, err := http.Get(url)
+	key := os.Getenv("WATCH_KEY")
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Printf("[!] Error creating request: %v\n", err)
+		return
+	}
+
+	req.Header.Set("X-Watch-Key", key)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("[!] Error connecting to backend: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == 401 {
+		fmt.Println("[!] Unauthorized (bad WATCH_KEY)")
+		return
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -150,6 +166,5 @@ func makeRequest(url string) {
 		return
 	}
 
-	// Prints raw JSON payload directly to terminal
 	fmt.Println(string(body))
 }
